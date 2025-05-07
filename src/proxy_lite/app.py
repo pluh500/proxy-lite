@@ -1,5 +1,6 @@
 # streamlit_app.py
 
+import sys
 import asyncio
 import base64
 import subprocess
@@ -9,6 +10,21 @@ import streamlit as st
 from PIL import Image
 
 from proxy_lite import Runner, RunnerConfig
+
+# Ensure Playwright browser binaries are installed only once
+def install_browsers():
+    # Use the same Python interpreter to run the Playwright install module
+    cmd = [sys.executable, "-m", "playwright", "install"]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        st.info("Playwright browsers installed successfully.")
+    except subprocess.CalledProcessError as e:
+        st.warning(
+            f"Failed to install Playwright browsers (exit {e.returncode}):\n{e.stderr}"
+        )
+
+# Run installation at startup
+install_browsers()
 
 def get_user_config(config_expander):
     config = {
@@ -177,6 +193,7 @@ async def run_task_async(
                 st.write(action)
     action_placeholder.write(" ")
     status_placeholder.write(f"✨ **Result:** {latest_step}")
+
 
 def main():
     st.title("⚡ Proxy-Lite")
