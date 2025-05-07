@@ -1,3 +1,4 @@
+import subprocess
 import asyncio
 import base64
 from io import BytesIO
@@ -7,6 +8,8 @@ from PIL import Image
 
 from proxy_lite import Runner, RunnerConfig
 
+# Install Playwright with Chromium dependencies
+subprocess.run(["playwright", "install", "--with-deps", "chromium"], check=True)
 
 def get_user_config(config_expander):
     config = {
@@ -20,7 +23,7 @@ def get_user_config(config_expander):
             "include_poi_text": True,
             "homepage": "https://www.google.com",
             "keep_original_image": False,
-            "headless": True,  # without proxies headless mode often results in getting bot blocked
+            "headless": True,
         },
         "solver": {
             "name": "simple",
@@ -35,7 +38,7 @@ def get_user_config(config_expander):
         },
         "local_view": False,
         "verbose": True,
-        "task_timeout": 1800,  # 30 minutes
+        "task_timeout": 1800,
         "action_timeout": 300,
         "environment_timeout": 30,
     }
@@ -122,7 +125,6 @@ async def run_task_async(
     print(config)
     runner = Runner(config=config)
 
-    # Add the spinning animation using HTML
     status_placeholder.markdown(
         """
         <style>
@@ -148,19 +150,17 @@ async def run_task_async(
     all_soms = []
 
     async for run in runner.run_generator(task):
-        # Update status with latest step
         if run.actions:
             latest_step = run.actions[-1].text
             latest_step += "".join(
                 [
-                    f'<tool_call>{{"name": {tool_call.function["name"]}, "arguments": {tool_call.function["arguments"]}}}</tool_call>'  # noqa: E501
+                    f'<tool_call>{{"name": {tool_call.function["name"]}, "arguments": {tool_call.function["arguments"]}}}</tool_call>'
                     for tool_call in run.actions[-1].tool_calls
                 ]
             )
             action_placeholder.write(f"⚡ **Latest Step:** {latest_step}")
             all_steps.append(latest_step)
 
-        # Update image if available
         if run.observations and run.observations[-1].state.image:
             environment_placeholder.write("🌐 **Environment:**")
             image_bytes = base64.b64decode(run.observations[-1].state.image)
@@ -170,7 +170,6 @@ async def run_task_async(
             som = run.observations[-1].state.text
             all_soms.append(som)
 
-        # Update history
         with history_placeholder, st.expander("🕝 **History**"):
             for idx, (action, img, som) in enumerate(zip(all_steps, all_screenshots, all_soms, strict=False)):
                 st.write(f"**Step {idx + 1}**")
@@ -209,7 +208,6 @@ def main():
         if submit_button:
             st.session_state.config_expanded = False
             if task:
-                # Create placeholders for dynamic updates
                 status_placeholder = st.empty()
                 st.write(" ")
                 action_placeholder = st.empty()
@@ -217,7 +215,6 @@ def main():
                 image_placeholder = st.empty()
                 history_placeholder = st.empty()
 
-                # Run the async task
                 asyncio.run(
                     run_task_async(
                         task,
