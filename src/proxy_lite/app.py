@@ -1,15 +1,14 @@
-import subprocess
+# streamlit_app.py
+
 import asyncio
 import base64
+import subprocess
 from io import BytesIO
 
 import streamlit as st
 from PIL import Image
 
 from proxy_lite import Runner, RunnerConfig
-
-# Install Playwright with Chromium dependencies
-subprocess.run(["playwright", "install", "--with-deps", "chromium"], check=True)
 
 def get_user_config(config_expander):
     config = {
@@ -122,7 +121,7 @@ async def run_task_async(
     except Exception as e:
         st.error(f"Error loading RunnerConfig: {e!s}")
         return
-    print(config)
+
     runner = Runner(config=config)
 
     status_placeholder.markdown(
@@ -179,13 +178,8 @@ async def run_task_async(
     action_placeholder.write(" ")
     status_placeholder.write(f"✨ **Result:** {latest_step}")
 
-
 def main():
     st.title("⚡ Proxy-Lite")
-
-    def img_to_base64(image_path):
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode("utf-8")
 
     st.markdown("Powered by **Proxy-Lite**", unsafe_allow_html=True)
 
@@ -230,7 +224,6 @@ def main():
                 st.success("Task completed!", icon="✨")
             else:
                 st.error("Please give a task first!")
-
 
 if __name__ == "__main__":
     main()
