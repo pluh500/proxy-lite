@@ -14,7 +14,7 @@ from proxy_lite import Runner, RunnerConfig
 # Ensure Playwright browser binaries are installed only once
 def install_browsers():
     # Use the same Python interpreter to run the Playwright install module
-    cmd = [sys.executable, "-m", "playwright", "install"]
+    cmd = [sys.executable, "-m", "playwright", "install", "--with-deps", "chromium"]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         st.info("Playwright browsers installed successfully.")
