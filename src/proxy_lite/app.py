@@ -9,7 +9,16 @@ from io import BytesIO
 import streamlit as st
 from PIL import Image
 
-from proxy_lite import Runner, RunnerConfig
+# First install proxy-lite from GitHub
+def install_proxy_lite():
+    cmd = [sys.executable, "-m", "pip", "install", "git+https://github.com/convergence-ai/proxy-lite.git"]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        st.info("Proxy-Lite installed successfully.")
+    except subprocess.CalledProcessError as e:
+        st.warning(
+            f"Failed to install Proxy-Lite (exit {e.returncode}):\n{e.stderr}"
+        )
 
 # Ensure Playwright browser binaries are installed only once
 def install_browsers():
@@ -23,8 +32,12 @@ def install_browsers():
             f"Failed to install Playwright browsers (exit {e.returncode}):\n{e.stderr}"
         )
 
-# Run installation at startup
+# Run installations at startup
+install_proxy_lite()
 install_browsers()
+
+# Now import proxy-lite after installation
+from proxy_lite import Runner, RunnerConfig
 
 def get_user_config(config_expander):
     config = {
