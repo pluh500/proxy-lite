@@ -11,3 +11,5 @@ libxrandr2
 libgbm1
 libxkbcommon0
 libasound2
+libgl1
+libglib2.0-0
